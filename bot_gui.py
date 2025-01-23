@@ -39,8 +39,10 @@ class DeltaHedgerBot:
         request['params']['timestamp'] = timestamp
         request['params']['api_key'] = self.api_key
         request['params']['signature'] = signature
-
-        return request
+        
+class BotInterface:
+    def start_bot(self):
+        asyncio.run_coroutine_threadsafe(self.deribit_connection.manage_connection(), asyncio.get_event_loop())
         
 class MplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -51,9 +53,11 @@ class MplCanvas(FigureCanvas):
 
 class BotInterface(QWidget):
     def __init__(self):
+        self.client_id = os.getenv('API_KEY')
+        self.client_secret = os.getenv('API_SECRET')
         super().__init__()
         self.bot = DeltaHedgerBot(client_id, client_secret)
-        self.deribit_connection = DeribitConnection(client_id, client_secret, "wss://www.deribit.com/ws/api/v2")
+        self.deribit_connection = DeribitConnection(self.client_id, self.client_secret, "wss://www.deribit.com/ws/api/v2")
         self.is_connected = False
         self.plot_data = {'time': [], 'delta': []}
         self.trades = []
@@ -500,3 +504,5 @@ if __name__ == '__main__':
         sys.exit(ex.custom_exec())
     except Exception as e:
         print(f"An error occurred: {e}")
+    
+    
